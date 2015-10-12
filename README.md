@@ -1,10 +1,19 @@
 paper-pikaday
 =========
 
-Material Design: <a href="http://www.google.com/design/spec/components/buttons.html">Datepicker</a>
+Polymer Material Design: Datepicker
+
+Dependencies:
+
+vanilla-masker
+https://github.com/BankFacil/vanilla-masker
+
+Use fork Pikaday
+https://github.com/dbushell/Pikaday
 
 Example:
 
 ```html
 <paper-pikaday label="from"></paper-pikaday>
 ```
+
