@@ -1,14 +1,15 @@
 {
   "name": "paper-pikaday",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A material design datepicker",
   "authors": [
     "Denis Baskovsky"
   ],
   "keywords": [
-    "web-components",
+    "datepicker",
     "polymer",
-    "datepicker"
+    "format date",
+    "web-components"
   ],
   "main": "paper-pikaday.html",
   "ignore": [],
@@ -19,7 +20,8 @@
   },
   "homepage": "git@github.com:BIFIT/paper-pikaday.git",
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.0.0"
+    "polymer": "Polymer/polymer#^1.0.0",
+    "vanilla-masker": "^1.1.0"
   },
   "devDependencies": {
     "web-component-tester": "*",

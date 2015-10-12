@@ -1,13 +1,13 @@
-<link rel="import" href="../../../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../../../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../../../../bower_components/paper-menu/paper-menu.html">
-<link rel="import" href="../../../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-menu/paper-menu.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-item/paper-item.html">
 <link inline rel="stylesheet" type="text/css" href="./pikaday.css">
 
 <script type="application/javascript" inline src="./pikaday.js"></script>
-<script src="../../../../bower_components/vanilla-masker/build/vanilla-masker.min.js"></script>
+<script src="../vanilla-masker/build/vanilla-masker.min.js"></script>
 
 <dom-module id="paper-pikaday">
 
@@ -31,19 +31,18 @@
     }
 
     input {
+      position: absolute;
       font-family: DroidSansMono, monospace;
+      font-size: 17px;
       padding: 0;
       margin: 0;
-      position: absolute;
       left: 0;
       outline: none;
       background-color: transparent;
       text-indent: 4px;
-      font-size: 17px;
-      border: 0;
+      border: none;
       height: auto;
       width: 100%;
-      /*border-bottom: 1px solid rgb(154, 154, 154);*/
       color: rgb(66, 69, 64);
       transition: box-shadow 0.5s ease;
     }
@@ -77,7 +76,6 @@
       position: relative;
       width: 170px;
     }
-
   </style>
 
   <template>
