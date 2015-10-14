@@ -4,7 +4,8 @@
  * Copyright © 2015 David Bushell | BSD & MIT license | https://github.com/dbushell/Pikaday
  * Copyright © 2015 Denis Baskovsky (Changes)
  */
-;(function (window, document, sto) {
+;
+(function (window, document, sto) {
   'use strict';
 
   const MM = 'Минуты';
@@ -513,7 +514,7 @@
           return;
         }
 
-        if(target.tagName === 'PAPER-MATERIAL') {
+        if (target.tagName === 'PAPER-MATERIAL') {
           return;
         }
 
@@ -614,6 +615,7 @@
       self._onInputBlur = function (e) {
         // IE allows pika div to gain focus; catch blur the input field
         var pEl = document.activeElement;
+
         do {
           if (hasClass(pEl, 'pika-single')) {
             return;
@@ -655,15 +657,19 @@
 
       addEvent(self.el, 'ontouchend' in document ? 'touchend' : 'mousedown', self._onMouseDown, true);
       addEvent(self.el, 'change', self._onChange);
+
       addEvent(opts.field, 'keyup', function (e) {
+        // нажатие таб - скрывает страницу
+        if (e.keyCode === 9) {
+          self.hideElem(document.querySelector('.pika-single'));
+          return;
+        }
 
         // обработчик Enter на форме input
         // Сохранение date
         if (e.keyCode === 13) {
           var date = Pikaday.convertStringToDate(e.target.value);
           self.setDate(date);
-
-          console.log('change date');
         }
 
       });
@@ -735,7 +741,7 @@
         null;
 
       opts.bound = !!(opts.bound !== undefined ?
-        opts.field && opts.bound :
+      opts.field && opts.bound :
         opts.field);
 
       opts.trigger = (opts.trigger && opts.trigger.nodeName) ? opts.trigger : opts.field;
@@ -956,6 +962,10 @@
       this._o.endRange = value;
     },
 
+    /**
+     * Кнопка ставящее текущее время
+     * @returns {Element}
+     */
     nowButton: function () {
       var self = this;
       var btn = document.createElement('paper-icon-button');
@@ -1166,6 +1176,7 @@
     },
 
     show: function () {
+      this.el.hidden = false;
       if (!this._v) {
         removeClass(this.el, 'is-hidden');
         this._v = true;
@@ -1195,6 +1206,10 @@
           this._o.onClose.call(this);
         }
       }
+    },
+
+    hideElem: function (elem) {
+      elem.hidden = true;
     },
 
     /**
