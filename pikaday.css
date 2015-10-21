@@ -4,7 +4,7 @@
  * Change styles 2015 Denis Baskovsky
  */
 .pika-single {
-  z-index: 9999;
+  z-index: 1;
   display: block;
   position: relative;
 /*
