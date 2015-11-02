@@ -14,6 +14,6 @@ https://github.com/dbushell/Pikaday
 Example:
 
 ```html
-<paper-pikaday label="from"></paper-pikaday>
+<paper-pikaday label="String" from="String" to="String"></paper-pikaday>
 ```
 
