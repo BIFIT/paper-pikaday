@@ -1,10 +1,10 @@
+;
 /**
  * Pikaday
  *
  * Copyright © 2015 David Bushell | BSD & MIT license | https://github.com/dbushell/Pikaday
  * Copyright © 2015 Denis Baskovsky (Changes)
  */
-;
 (function (window, document, sto) {
   'use strict';
 
@@ -20,7 +20,7 @@
     },
 
     fireEvent = function (el, eventName, data) {
-      var ev;
+      let ev;
 
       if (document.createEvent) {
         ev = document.createEvent('HTMLEvents');
@@ -254,10 +254,13 @@
         '</td>';
     },
 
+    /**
+     * Lifted from http://javascript.about.com/library/blweekyear.htm, lightly modified.
+     */
     renderWeek = function (d, m, y) {
-      // Lifted from http://javascript.about.com/library/blweekyear.htm, lightly modified.
-      var onejan = new Date(y, 0, 1),
-        weekNum = Math.ceil((((new Date(y, m, d) - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+      let onejan = new Date(y, 0, 1);
+      let weekNum = Math.ceil((((new Date(y, m, d) - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+
       return '<td class="pika-week">' + weekNum + '</td>';
     },
 
@@ -270,27 +273,27 @@
     },
 
     renderHead = function (opts) {
-      var i, arr = [];
+      let arr = [];
       if (opts.showWeekNumber) {
         arr.push('<th></th>');
       }
-      for (i = 0; i < 7; i++) {
+      for (let i = 0; i < 7; i++) {
         arr.push('<th scope="col"><abbr title="' + renderDayName(opts, i) + '">' + renderDayName(opts, i, true) + '</abbr></th>');
       }
+
       return '<thead>' + (opts.isRTL ? arr.reverse() : arr).join('') + '</thead>';
     },
 
     renderHours = function (instance, hh) {
-
-      var body = '';
+      let body = '';
 
       body += '<span class="drop-menu"><p>Часы</p>';
       body += `<paper-dropdown-menu label="${HH}" no-animations no-label-float>`;
       body += '<paper-menu class="dropdown-content">';
 
       // шаг в 2 часа
-      for (var i = 0; i < 24; i += 2) {
-        var text = i < 10 ? '0' + i : i;
+      for (let i = 0; i < 24; i += 2) {
+        let text = i < 10 ? '0' + i : i;
 
         body += '<paper-item>' + text + '</paper-item>';
       }
@@ -305,14 +308,13 @@
     },
 
     renderMinutes = function (instance, mm) {
-
-      var body = '';
+      let body = '';
       body += '<span class="drop-menu"><p>Минуты</p>';
       body += `<paper-dropdown-menu label="${MM}" no-animations no-label-float>`;
       body += '<paper-menu class="dropdown-content">';
 
       // шаг в 5 минут
-      for (var i = 0; i < 60; i += 5) {
+      for (let i = 0; i < 60; i += 5) {
         var text = i < 10 ? '0' + i : i;
 
         body += '<paper-item>' + text + '</paper-item>';
@@ -329,15 +331,17 @@
     },
 
     renderTitle = function (instance, c, year, month, refYear) {
-      var i, j, arr,
-        opts = instance._o,
-        isMinYear = year === opts.minYear,
-        isMaxYear = year === opts.maxYear,
-        html = '<div class="pika-title">',
-        monthHtml,
-        yearHtml,
-        prev = true,
-        next = true;
+      let i;
+      let j;
+      let arr;
+      let opts = instance._o;
+      let isMinYear = year === opts.minYear;
+      let isMaxYear = year === opts.maxYear;
+      let html = '<div class="pika-title">';
+      let monthHtml;
+      let yearHtml;
+      let prev = true;
+      let next = true;
 
       for (arr = [], i = 0; i < 12; i++) {
         arr.push('<option value="' + (year === refYear ? i - c : 12 + i - c) + '"' +
@@ -446,8 +450,8 @@
         return false;
       }
 
-      for (var i = 0; i < $pdm.length; i++) {
-        var e = $pdm[i];
+      for (let i = 0; i < $pdm.length; i++) {
+        let e = $pdm[i];
 
         if (e.opened) {
           e.close();
@@ -464,7 +468,7 @@
         mm = getMM.bind(instance)();
 
         if (self && self.calendars) {
-          var cDate = self.calendars[0];
+          let cDate = self.calendars[0];
           yyyy = cDate.year;
           MM = cDate.month;
           dd = cDate.day;
@@ -493,7 +497,6 @@
       }
 
       return new Date(yyyy, MM, dd, hh, mm);
-
     },
 
     /**
@@ -514,31 +517,34 @@
           return;
         }
 
-        if (target.tagName === 'PAPER-MATERIAL') {
-          return;
+        switch (target.tagName) {
+          case 'PAPER-MATERIAL':
+            return;
+
+          // Если кликаем на выпадающий список - обновляем значения
+          // и пропускаем обработчик закрытия окна
+          case 'PAPER-ITEM':
+            let date = getFormatDate(this, null, self);
+            let labelName = target.closest('[label]').getAttribute('label');
+            let newVal = String(target.textContent);
+
+            if (HH === labelName) {
+              date.setHours(newVal);
+              self.calendars[0].hour = newVal;
+            } else if (MM === labelName) {
+              date.setMinutes(newVal);
+              self.calendars[0].minute = newVal;
+            }
+
+            self._d = date;
+            self.setFieldFormat();
+
+            return;
+
+          default:
+            break;
         }
 
-        // Если кликаем на выпадающий список - обновляем значения
-        // и пропускаем обработчик закрытия окна
-        else if (target.tagName === 'PAPER-ITEM') {
-
-          var date = getFormatDate(this, null, self);
-          var labelName = target.closest('[label]').getAttribute('label');
-          var newVal = String(target.textContent);
-
-          if (HH === labelName) {
-            date.setHours(newVal);
-            self.calendars[0].hour = newVal;
-          } else if (MM === labelName) {
-            date.setMinutes(newVal);
-            self.calendars[0].minute = newVal;
-          }
-
-          self._d = date;
-          self.setFieldFormat();
-
-          return;
-        }
 
         if (target.getAttribute('data-pika-year')) {
           self._d = getFormatDate(this, target);
@@ -565,7 +571,8 @@
             e.preventDefault();
           } else {
             e.returnValue = false;
-            return false;
+
+            return e.returnValue;
           }
         } else {
           self._c = true;
@@ -574,7 +581,7 @@
 
       self._onChange = function (e) {
         e = e || window.event;
-        var target = e.target || e.srcElement;
+        let target = e.target || e.srcElement;
 
         if (!target) {
           return;
@@ -588,13 +595,11 @@
       };
 
       self._onInputChange = function (e) {
-        var date;
-
         if (e.firedBy === self) {
           return;
         }
 
-        date = new Date(Date.parse(opts.field.value));
+        let date = new Date(Date.parse(opts.field.value));
 
         if (isDate(date)) {
           self.setDate(date);
@@ -612,7 +617,7 @@
         self.show();
       };
 
-      self._onInputBlur = function (e) {
+      self._onInputBlur = function () {
         // IE allows pika div to gain focus; catch blur the input field
         var pEl = document.activeElement;
 
@@ -629,21 +634,24 @@
         e = e || window.event;
         var target = e.target || e.srcElement,
           pEl = target;
+
         if (!target) {
           return;
         }
+
         if (hasClass(target, 'pika-select')) {
           if (!target.onchange) {
             target.setAttribute('onchange', 'return;');
             addEvent(target, 'change', self._onChange);
           }
         }
+
         do {
           if (hasClass(pEl, 'pika-single') || pEl === opts.trigger) {
             return;
           }
-        }
-        while ((pEl = pEl.parentNode));
+        } while ((pEl = pEl.parentNode));
+
         if (self._v && target !== opts.trigger && pEl !== opts.trigger) {
           self.hide();
         }
@@ -652,7 +660,7 @@
       self.el = document.createElement('paper-material');
       self.el.elevation = 2;
       self.el.style.backgroundColor = 'white';
-
+      self.el.style.position = 'absolute';
       self.el.className = 'pika-single' + (opts.isRTL ? ' is-rtl' : '');
 
       addEvent(self.el, 'ontouchend' in document ? 'touchend' : 'mousedown', self._onMouseDown, true);
@@ -668,7 +676,7 @@
         // обработчик Enter на форме input
         // Сохранение date
         if (e.keyCode === 13) {
-          var date = Pikaday.convertStringToDate(e.target.value);
+          let date = Pikaday.convertStringToDate(e.target.value);
           self.setDate(date);
         }
 
@@ -687,15 +695,13 @@
         addEvent(opts.field, 'change', self._onInputChange);
 
         if (!opts.defaultDate) {
-
           opts.defaultDate = new Date(Date.parse(opts.field.value));
-
           opts.setDefaultDate = true;
         }
 
       }
 
-      var defDate = opts.defaultDate;
+      let defDate = opts.defaultDate;
 
       if (isDate(defDate)) {
         if (opts.setDefaultDate) {
@@ -732,7 +738,7 @@
         this._o = extend({}, defaults, true);
       }
 
-      var opts = extend(this._o, options, true);
+      let opts = extend(this._o, options, true);
 
       opts.isRTL = !!opts.isRTL;
 
@@ -741,8 +747,9 @@
         null;
 
       opts.bound = !!(opts.bound !== undefined ?
-      opts.field && opts.bound :
-        opts.field);
+        opts.field && opts.bound :
+          opts.field
+      );
 
       opts.trigger = (opts.trigger && opts.trigger.nodeName) ? opts.trigger : opts.field;
 
@@ -750,7 +757,7 @@
 
       opts.disableDayFn = (typeof opts.disableDayFn) === 'function' ? opts.disableDayFn : null;
 
-      var nom = parseInt(opts.numberOfMonths, 10) || 1;
+      let nom = parseInt(opts.numberOfMonths, 10) || 1;
       opts.numberOfMonths = nom > 4 ? 4 : nom;
 
       if (!isDate(opts.minDate)) {
@@ -771,7 +778,7 @@
       }
 
       if (isArray(opts.yearRange)) {
-        var fallback = new Date().getFullYear() - 10;
+        let fallback = new Date().getFullYear() - 10;
         opts.yearRange[0] = parseInt(opts.yearRange[0], 10) || fallback;
         opts.yearRange[1] = parseInt(opts.yearRange[1], 10) || fallback;
       } else {
@@ -851,6 +858,7 @@
         this._o.field.value = this.toString();
         fireEvent(this._o.field, 'change', {firedBy: this});
       }
+
       if (typeof this._o.onSelect === 'function') {
         this._o.onSelect.call(this, this.getDate());
       }
@@ -895,7 +903,7 @@
 
     adjustCalendars: function () {
       this.calendars[0] = adjustCalendar(this.calendars[0]);
-      for (var c = 1; c < this._o.numberOfMonths; c++) {
+      for (let c = 1; c < this._o.numberOfMonths; c++) {
         this.calendars[c] = adjustCalendar({
           month: this.calendars[0].month + c,
           year: this.calendars[0].year
@@ -968,13 +976,13 @@
      */
     nowButton: function () {
       var self = this;
-      var btn = document.createElement('paper-icon-button');
+      let btn = document.createElement('paper-icon-button');
       btn.icon = 'restore';
       btn.title = 'Установить текущее время';
       btn.className = 'nowBtn';
 
-      btn.onclick = function (e) {
-        var now = new Date();
+      btn.onclick = function () {
+        let now = new Date();
         self.setDate(now);
       };
 
@@ -985,7 +993,6 @@
      * refresh the HTML
      */
     draw: function (force) {
-
       if (!this._v && !force) {
         return;
       }
@@ -1012,14 +1019,13 @@
         }
       }
 
-      for (var c = 0; c < opts.numberOfMonths; c++) {
+      for (let c = 0; c < opts.numberOfMonths; c++) {
+        let cDate = this.calendars[c];
 
-        var cDate = this.calendars[c];
-
+        //Записываем выборку по часам и минутам
         html += '<div class="pika-lendar">' +
           renderTitle(this, c, cDate.year, cDate.month, this.calendars[0].year) +
           this.render(cDate.year, cDate.month, cDate.hour, cDate.minute) +
-            //Записываем выборку по часам и минутам
           '<div class="footer">' + renderHours(this, cDate.hour) + renderMinutes(this, cDate.minute) + '</div>' +
           '</div>';
       }
@@ -1043,56 +1049,18 @@
 
     },
 
+    /**
+     * Установка позиции по левому краю инпута
+     */
     adjustPosition: function () {
-      var field, pEl, width, height, viewportWidth, viewportHeight, scrollTop, left, top, clientRect;
+      let field = this._o.trigger;
+      let clientRect = field.getBoundingClientRect();
 
-      if (this._o.container) return;
+      let left = clientRect.left - clientRect.width / 2 - field.offsetWidth;
+      let top = clientRect.bottom - clientRect.height - field.offsetHeight;
 
-      this.el.style.position = 'absolute';
-
-      field = this._o.trigger;
-      pEl = field;
-      width = this.el.offsetWidth;
-      height = this.el.offsetHeight;
-      viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-      viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-      scrollTop = window.pageYOffset || document.body.scrollTop || document.documentElement.scrollTop;
-
-      if (typeof field.getBoundingClientRect === 'function') {
-        clientRect = field.getBoundingClientRect();
-        left = clientRect.left + window.pageXOffset;
-        top = clientRect.bottom + window.pageYOffset;
-      } else {
-        left = pEl.offsetLeft;
-        top = pEl.offsetTop + pEl.offsetHeight;
-
-        while ((pEl = pEl.offsetParent)) {
-          left += pEl.offsetLeft;
-          top += pEl.offsetTop;
-        }
-      }
-
-      // default position is bottom & left
-      if ((this._o.reposition && left + width > viewportWidth) ||
-        (
-          this._o.position.indexOf('right') > -1 &&
-          left - width + field.offsetWidth > 0
-        )
-      ) {
-        left = left - width + field.offsetWidth;
-      }
-
-      if ((this._o.reposition && top + height > viewportHeight + scrollTop) ||
-        (
-          this._o.position.indexOf('top') > -1 &&
-          top - height - field.offsetHeight > 0
-        )
-      ) {
-        top = top - height - field.offsetHeight;
-      }
-
-      this.el.style.left = left + 'px';
-      this.el.style.top = top + 'px';
+      this.el.style.left = `${left}px`;
+      this.el.style.top = `${top}px`;
     },
 
     isToday: function (a, b) {
@@ -1100,7 +1068,6 @@
       a.setMinutes(0);
       a.setSeconds(0);
       a.setMilliseconds(0);
-
       b.setHours(0);
       b.setMinutes(0);
       b.setSeconds(0);
@@ -1127,7 +1094,7 @@
         }
       }
 
-      var cells = days + before,
+      let cells = days + before,
         after = cells;
 
       while (after > 7) {
@@ -1135,8 +1102,8 @@
       }
 
       cells += 7 - after;
-      for (var i = 0, r = 0; i < cells; i++) {
-        var day = new Date(year, month, 1 + (i - before), hh, mm),
+      for (let i = 0, r = 0; i < cells; i++) {
+        let day = new Date(year, month, 1 + (i - before), hh, mm),
           isSelected = isDate(this._d) ? compareDates(day, this._d) : false,
           isToday = this.isToday(day, now),
           isEmpty = i < before || i >= (days + before),
@@ -1192,17 +1159,13 @@
     },
 
     hide: function () {
-      var v = this._v;
-      if (v !== false) {
+      if (this._v !== false) {
         if (this._o.bound) {
           removeEvent(document, 'click', this._onClick);
         }
-        this.el.style.position = 'static'; // reset
-        this.el.style.left = 'auto';
-        this.el.style.top = 'auto';
         addClass(this.el, 'is-hidden');
         this._v = false;
-        if (v !== undefined && typeof this._o.onClose === 'function') {
+        if (typeof this._o.onClose === 'function') {
           this._o.onClose.call(this);
         }
       }
@@ -1249,32 +1212,31 @@
       throw 'date is not a Date';
     }
 
-    var dd = date.getDate();
-
     if (isNaN(date.getDate())) {
       throw 'date is NaN';
     }
 
-    dd = (dd < 10)
-      ? '0' + dd
-      : dd;
+    let dd = date.getDate();
+    dd = (dd < 10) ?
+    '0' + dd :
+      dd;
 
-    var month = date.getMonth() + 1;
-    month = (month < 10)
-      ? '0' + month
-      : month;
+    let month = date.getMonth() + 1;
+    month = (month < 10) ?
+    '0' + month :
+      month;
 
-    var yyyy = date.getFullYear();
+    let yyyy = date.getFullYear();
 
-    var hh = date.getHours();
-    hh = (hh < 10)
-      ? '0' + hh
-      : hh;
+    let hh = date.getHours();
+    hh = (hh < 10) ?
+    '0' + hh :
+      hh;
 
-    var mm = date.getMinutes();
-    mm = (mm < 10)
-      ? '0' + mm
-      : mm;
+    let mm = date.getMinutes();
+    mm = (mm < 10) ?
+    '0' + mm :
+      mm;
 
     return `${dd}.${month}.${yyyy} ${hh}:${mm}`;
 
@@ -1286,17 +1248,17 @@
    * @returns {Date}
    */
   Pikaday.convertStringToDate = function (str) {
-    var dd, month, yyyy, hh, mm;
-
-    dd = str.slice(0, 2) - 0;
-    month = str.slice(3, 5) - 1;
-    yyyy = str.slice(6, 10) - 0;
-    hh = str.slice(11, 13) - 0;
-    mm = str.slice(14, 16) - 0;
+    let dd = str.slice(0, 2) - 0;
+    let month = str.slice(3, 5) - 1;
+    let yyyy = str.slice(6, 10) - 0;
+    let hh = str.slice(11, 13) - 0;
+    let mm = str.slice(14, 16) - 0;
 
     return new Date(yyyy, month, dd, hh, mm);
   };
 
-  return window.Pikaday = Pikaday;
+  window.Pikaday = Pikaday;
+
+  return Pikaday;
 
 }(window, window.document, window.setTimeout));

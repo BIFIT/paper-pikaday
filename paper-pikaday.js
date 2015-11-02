@@ -1,5 +1,5 @@
 'use strict';
-Polymer({
+new Polymer({
   is: 'paper-pikaday',
 
   _maskPattern: '99.99.9999 99:99',
@@ -7,56 +7,77 @@ Polymer({
 
   field: null,
   properties: {
-    minDate: Date,
-    maxDate: Date,
-    date: Date,
-    id: String
+    id: String,
+
+    from: {
+      type: String
+    },
+    to: {
+      type: String
+    },
+
+    date: Date
+  },
+
+  /**
+   * Клик на число
+   * @param {Date} date
+   */
+  onSelect: function (date) {
+    this.date = date;
+    this.field.value = window.Pikaday.toFormatDate(date);
   },
 
   ready: function () {
-    var self = this;
-    var field = this.field = this.$$('#' + this.id);
-    var maskField = this.$['input-mask'];
+    let field = this.field = this.$$('#' + this.id);
+    let maskField = this.$['input-mask'];
 
     field.maxLength = maskField.maxLength = this._maskPattern.length;
 
-    var placeholder = '';
-    for (var i = 0; i < this._maskPattern.length; i++) {
-      var val = this._maskPattern[i];
-      if (val.search(/\D/)) {
+    let placeholder = '';
+    for (let i = 0; i < maskField.maxLength; i++) {
+      let patternValue = this._maskPattern[i];
+      if (patternValue.search(/\D/)) {
         placeholder += ' ';
       } else {
-        placeholder += val;
+        placeholder += patternValue;
       }
     }
     field.placeholder = this._placeholder;
     maskField.placeholder = placeholder;
 
-    var minDate = this.minDate || new Date(2015, 0, 1);
-    var currentDate = this.maxDate || new Date();
-
-    if (!window.hasOwnProperty('Pikaday')) {
-      throw 'Pikaday is not ready';
+    let minDate = new Date(0);
+    if (this.from) {
+      minDate = new Date(this.from);
     }
-    new Pikaday({
-      field: field,
-      showWeekNumber: true,
-      firstDay: 1,
-      numberOfMonths: 1,
-      minDate: minDate,
-      maxDate: currentDate,
-      yearRange: [minDate.getFullYear(), currentDate.getFullYear()],
 
-      onSelect: function (date) {
-        self.date = date;
-        self.field.value = Pikaday.toFormatDate(date);
-      }
-    });
-
-    if (!window.hasOwnProperty('VMasker')) {
-      throw 'VMasker is not ready';
+    let maxDate = new Date();
+    if (this.to) {
+      maxDate = new Date(this.to);
     }
-    VMasker(field).maskPattern(this._maskPattern);
+
+    try {
+      //debugger;
+      new window.Pikaday({
+        field,
+        showWeekNumber: true,
+        firstDay: 1,
+        numberOfMonths: 1,
+        minDate,
+        maxDate,
+        yearRange: [minDate.getFullYear(), maxDate.getFullYear()],
+        container: this.parentElement,
+        onSelect: this.onSelect.bind(this)
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    try {
+      window.VMasker(field).maskPattern(this._maskPattern);
+    } catch (e) {
+      console.error(e);
+    }
 
   }
 
