@@ -8,9 +8,7 @@
 
 <script src="../vanilla-masker/build/vanilla-masker.min.js"></script>
 <script>"use strict";
-;
 (function(window, document, sto) {
-  'use strict';
   var MM = 'Минуты';
   var HH = 'Часы';
   var addEvent = function(el, e, callback, capture) {
@@ -175,7 +173,7 @@
       renderWeek = function(d, m, y) {
         var onejan = new Date(y, 0, 1);
         var weekNum = Math.ceil((((new Date(y, m, d) - onejan) / 86400000) + onejan.getDay() + 1) / 7);
-        return '<td class="pika-week">' + weekNum + '</td>';
+        return ("<td class=\"pika-week\">" + weekNum + "</td>");
       },
       renderRow = function(days, isRTL) {
         return '<tr>' + (isRTL ? days.reverse() : days).join('') + '</tr>';
@@ -200,7 +198,7 @@
         body += '<paper-menu class="dropdown-content">';
         for (var i = 0; i < 24; i += 2) {
           var text = i < 10 ? '0' + i : i;
-          body += '<paper-item>' + text + '</paper-item>';
+          body += ("<paper-item>" + text + "</paper-item>");
         }
         body += '</paper-menu></paper-dropdown-menu></span>';
         sto(function() {
@@ -313,8 +311,9 @@
         return this.querySelector(("[label=\"" + HH + "\"] paper-input"));
       },
       hideDropdowns = function(instance) {
+        var $pdm;
         try {
-          var $pdm = instance.querySelectorAll('paper-dropdown-menu');
+          $pdm = instance.querySelectorAll('paper-dropdown-menu');
         } catch (e) {
           return false;
         }

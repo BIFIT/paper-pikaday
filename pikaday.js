@@ -1,13 +1,11 @@
-;
 /**
  * Pikaday
  *
  * Copyright © 2015 David Bushell | BSD & MIT license | https://github.com/dbushell/Pikaday
  * Copyright © 2015 Denis Baskovsky (Changes)
  */
+'use strict';
 (function (window, document, sto) {
-  'use strict';
-
   const MM = 'Минуты';
   const HH = 'Часы';
 
@@ -15,11 +13,11 @@
       el.addEventListener(e, callback, !!capture);
     },
 
-    removeEvent = function (el, e, callback, capture) {
+    removeEvent = (el, e, callback, capture) => {
       el.removeEventListener(e, callback, !!capture);
     },
 
-    fireEvent = function (el, eventName, data) {
+    fireEvent = (el, eventName, data) => {
       let ev;
 
       if (document.createEvent) {
@@ -211,6 +209,7 @@
       while (day >= 7) {
         day -= 7;
       }
+
       return abbr ? opts.i18n.weekdaysShort[day] : opts.i18n.weekdays[day];
     },
 
@@ -219,7 +218,7 @@
         return '<td class="is-empty"></td>';
       }
 
-      var button = '<button type="button" class="pika-button pika-day" ';
+      let button = '<button type="button" class="pika-button pika-day" ';
 
       var arr = [];
       if (opts.isDisabled) {
@@ -257,22 +256,22 @@
     /**
      * Lifted from http://javascript.about.com/library/blweekyear.htm, lightly modified.
      */
-    renderWeek = function (d, m, y) {
+    renderWeek = (d, m, y) => {
       let onejan = new Date(y, 0, 1);
       let weekNum = Math.ceil((((new Date(y, m, d) - onejan) / 86400000) + onejan.getDay() + 1) / 7);
 
-      return '<td class="pika-week">' + weekNum + '</td>';
+      return `<td class="pika-week">${weekNum}</td>`;
     },
 
-    renderRow = function (days, isRTL) {
+    renderRow = (days, isRTL) => {
       return '<tr>' + (isRTL ? days.reverse() : days).join('') + '</tr>';
     },
 
-    renderBody = function (rows) {
+    renderBody = (rows) => {
       return '<tbody>' + rows.join('') + '</tbody>';
     },
 
-    renderHead = function (opts) {
+    renderHead = (opts) => {
       let arr = [];
       if (opts.showWeekNumber) {
         arr.push('<th></th>');
@@ -284,7 +283,7 @@
       return '<thead>' + (opts.isRTL ? arr.reverse() : arr).join('') + '</thead>';
     },
 
-    renderHours = function (instance, hh) {
+    renderHours = (instance, hh) => {
       let body = '';
 
       body += '<span class="drop-menu"><p>Часы</p>';
@@ -293,21 +292,23 @@
 
       // шаг в 2 часа
       for (let i = 0; i < 24; i += 2) {
-        let text = i < 10 ? '0' + i : i;
+        let text = i < 10 ?
+          '0' + i :
+          i;
 
-        body += '<paper-item>' + text + '</paper-item>';
+        body += `<paper-item>${text}</paper-item>`;
       }
 
       body += '</paper-menu></paper-dropdown-menu></span>';
 
-      sto(function () {
+      sto(() => {
         setHH.bind(instance)(hh);
       }, 0);
 
       return body;
     },
 
-    renderMinutes = function (instance, mm) {
+    renderMinutes = (instance, mm) => {
       let body = '';
       body += '<span class="drop-menu"><p>Минуты</p>';
       body += `<paper-dropdown-menu label="${MM}" no-animations no-label-float>`;
@@ -315,14 +316,14 @@
 
       // шаг в 5 минут
       for (let i = 0; i < 60; i += 5) {
-        var text = i < 10 ? '0' + i : i;
+        const text = i < 10 ? '0' + i : i;
 
         body += '<paper-item>' + text + '</paper-item>';
       }
 
       body += '</paper-menu></paper-dropdown-menu></span>';
 
-      sto(function () {
+      sto(() => {
         setMM.bind(instance)(mm);
       }, 0);
 
@@ -413,7 +414,7 @@
       return html += '</div>';
     },
 
-    renderTable = function (opts, data) {
+    renderTable = (opts, data) => {
       return '<table cellpadding="0" cellspacing="0" class="pika-table">' + renderHead(opts) + renderBody(data) + '</table>';
     },
 
@@ -442,10 +443,10 @@
     },
 
     hideDropdowns = function (instance) {
-
+      var $pdm;
       // TODO: неправильно кидается this
       try {
-        var $pdm = instance.querySelectorAll('paper-dropdown-menu');
+        $pdm = instance.querySelectorAll('paper-dropdown-menu');
       } catch (e) {
         return false;
       }
@@ -609,17 +610,17 @@
         }
       };
 
-      self._onInputFocus = function () {
+      self._onInputFocus = () => {
         self.show();
       };
 
-      self._onInputClick = function () {
+      self._onInputClick = () => {
         self.show();
       };
 
       self._onInputBlur = function () {
         // IE allows pika div to gain focus; catch blur the input field
-        var pEl = document.activeElement;
+        let pEl = document.activeElement;
 
         do {
           if (hasClass(pEl, 'pika-single')) {
