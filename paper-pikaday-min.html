@@ -91,11 +91,11 @@
              type="text">
       <input type="text"
              disabled
-             id="input-mask">
+             id="inputMask">
     </div>
 
   </template>
 
-  <script type="application/javascript">"use strict";new Polymer({is:"paper-pikaday",_maskPattern:"99.99.9999 99:99",_placeholder:"ДД.ММ.ГГГГ чч:мм",field:null,properties:{id:String,from:{type:String},to:{type:String},date:Date},onSelect:function(e){this.date=e,this.field.value=window.Pikaday.toFormatDate(e)},ready:function(){var e=this.field=this.$$("#"+this.id),t=this.$["input-mask"];e.maxLength=t.maxLength=this._maskPattern.length;for(var a="",r=0;r<t.maxLength;r++){var i=this._maskPattern[r];a+=i.search(/\D/)?" ":i}e.placeholder=this._placeholder,t.placeholder=a;var n=new Date(0);this.from&&(n=new Date(this.from));var s=new Date;this.to&&(s=new Date(this.to));try{new window.Pikaday({field:e,showWeekNumber:!0,firstDay:1,numberOfMonths:1,minDate:n,maxDate:s,yearRange:[n.getFullYear(),s.getFullYear()],container:this.parentElement,onSelect:this.onSelect.bind(this)})}catch(o){console.error(o)}try{window.VMasker(e).maskPattern(this._maskPattern)}catch(o){console.error(o)}}});</script>
+  <script>"use strict";!function(t){var e=t.Pikaday,a=t.VMasker;new Polymer({is:"paper-pikaday",_maskPattern:"99.99.9999 99:99",_placeholder:"ДД.ММ.ГГГГ чч:мм",_field:null,_vMasker:null,_pikaday:null,properties:{id:String,from:String,until:String,date:Date},get field(){return this._field},onSelect:function(t){this.date=t,this._field.value=e.toFormatDate(t)},showDatePicker:function(){this._pikaday.show()},_setPlaceholder:function(t){var e=this.$.inputMask;t.maxLength=e.maxLength=this._maskPattern.length;for(var a="",n=0;n<e.maxLength;n++){var i=this._maskPattern[n];a+=i.search(/\D/)?" ":i}t.placeholder=this._placeholder,e.placeholder=a},_getDefaultDates:function(){var t=new Date(0);this.from&&(t=new Date(this.from));var e=new Date;return this.until&&(e=new Date(this.until)),{minDate:t,maxDate:e}},_loadPikaday:function(t){var a=this._getDefaultDates(),n=a.minDate,i=a.maxDate;try{return new e({field:t,showWeekNumber:!0,firstDay:1,numberOfMonths:1,minDate:n,maxDate:i,yearRange:[n.getFullYear(),i.getFullYear()],container:this.parentElement,onSelect:this.onSelect.bind(this)})}catch(r){return null}},_loadVMasker:function(t){try{return new a(t).maskPattern(this._maskPattern)}catch(e){return null}},ready:function(){var t=this._field=this.$$("#"+this.id);this._setPlaceholder(t),this._pikaday=this._loadPikaday(t),this._vMasker=this._loadVMasker(t)}})}(window);</script>
 
 </dom-module>

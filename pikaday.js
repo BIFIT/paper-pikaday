@@ -200,11 +200,10 @@
       onDraw: null
     },
 
-
     /**
      * templating functions to abstract HTML rendering
      */
-    renderDayName = function (opts, day, abbr) {
+    renderDayName = (opts, day, abbr) => {
       day += opts.firstDay;
       while (day >= 7) {
         day -= 7;
@@ -328,7 +327,6 @@
       }, 0);
 
       return body;
-
     },
 
     renderTitle = function (instance, c, year, month, refYear) {
@@ -462,7 +460,7 @@
     },
 
     getFormatDate = function (instance, target, self) {
-      var hh, mm, yyyy, MM, dd;
+      let hh, mm, yyyy, MM, dd;
 
       if (instance.tagName === 'PAPER-MATERIAL') {
         hh = getHH.bind(instance)();
@@ -546,7 +544,6 @@
             break;
         }
 
-
         if (target.getAttribute('data-pika-year')) {
           self._d = getFormatDate(this, target);
         }
@@ -580,7 +577,7 @@
         }
       };
 
-      self._onChange = function (e) {
+      self._onChange = (e) => {
         e = e || window.event;
         let target = e.target || e.srcElement;
 
@@ -595,7 +592,7 @@
         }
       };
 
-      self._onInputChange = function (e) {
+      self._onInputChange = (e) => {
         if (e.firedBy === self) {
           return;
         }

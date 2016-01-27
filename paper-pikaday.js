@@ -1,84 +1,134 @@
-'use strict';
-new Polymer({
-  is: 'paper-pikaday',
+(function (window) {
+  'use strict';
 
-  _maskPattern: '99.99.9999 99:99',
-  _placeholder: 'ДД.ММ.ГГГГ чч:мм',
+  const Pikaday = window.Pikaday;
+  const VMasker = window.VMasker;
 
-  field: null,
-  properties: {
-    id: String,
+  new Polymer({
+    is: 'paper-pikaday',
 
-    from: {
-      type: String
+    _maskPattern: '99.99.9999 99:99',
+    _placeholder: 'ДД.ММ.ГГГГ чч:мм',
+
+    _field: null,
+    _vMasker: null,
+    _pikaday: null,
+
+    properties: {
+      id: String,
+
+      from: String,
+      until: String,
+
+      date: Date
     },
-    to: {
-      type: String
+
+    get field() {
+      return this._field;
     },
 
-    date: Date
-  },
+    /**
+     * Клик на число
+     * @param {Date} date
+     */
+      onSelect(date) {
+      this.date = date;
+      this._field.value = Pikaday.toFormatDate(date);
+    },
 
-  /**
-   * Клик на число
-   * @param {Date} date
-   */
-  onSelect: function (date) {
-    this.date = date;
-    this.field.value = window.Pikaday.toFormatDate(date);
-  },
+    /**
+     * Открыть датапикер
+     */
+      showDatePicker() {
+      this._pikaday.show();
+    },
 
-  ready: function () {
-    let field = this.field = this.$$('#' + this.id);
-    let maskField = this.$['input-mask'];
+    /**
+     * Заполнение плейсхолдера
+     * @param field {Node}
+     */
+      _setPlaceholder(field) {
+      let maskField = this.$.inputMask;
 
-    field.maxLength = maskField.maxLength = this._maskPattern.length;
+      field.maxLength = maskField.maxLength = this._maskPattern.length;
 
-    let placeholder = '';
-    for (let i = 0; i < maskField.maxLength; i++) {
-      let patternValue = this._maskPattern[i];
-      if (patternValue.search(/\D/)) {
-        placeholder += ' ';
-      } else {
-        placeholder += patternValue;
+      let placeholder = '';
+      for (let i = 0; i < maskField.maxLength; i++) {
+        let patternValue = this._maskPattern[i];
+        if (patternValue.search(/\D/)) {
+          placeholder += ' ';
+        } else {
+          placeholder += patternValue;
+        }
       }
-    }
-    field.placeholder = this._placeholder;
-    maskField.placeholder = placeholder;
+      field.placeholder = this._placeholder;
+      maskField.placeholder = placeholder;
+    },
 
-    let minDate = new Date(0);
-    if (this.from) {
-      minDate = new Date(this.from);
-    }
+    _getDefaultDates() {
+      let minDate = new Date(0);
+      if (this.from) {
+        minDate = new Date(this.from);
+      }
 
-    let maxDate = new Date();
-    if (this.to) {
-      maxDate = new Date(this.to);
-    }
+      let maxDate = new Date();
+      if (this.until) {
+        maxDate = new Date(this.until);
+      }
 
-    try {
-      //debugger;
-      new window.Pikaday({
-        field,
-        showWeekNumber: true,
-        firstDay: 1,
-        numberOfMonths: 1,
+      return {
         minDate,
-        maxDate,
-        yearRange: [minDate.getFullYear(), maxDate.getFullYear()],
-        container: this.parentElement,
-        onSelect: this.onSelect.bind(this)
-      });
-    } catch (e) {
-      console.error(e);
+        maxDate
+      };
+    },
+
+    /**
+     * Загрузка Pikaday
+     * @param field {Node}
+     */
+      _loadPikaday(field) {
+      let defaultDates = this._getDefaultDates();
+      let minDate = defaultDates.minDate;
+      let maxDate = defaultDates.maxDate;
+
+      try {
+        return new Pikaday({
+          field,
+          showWeekNumber: true,
+          firstDay: 1,
+          numberOfMonths: 1,
+          minDate,
+          maxDate,
+          yearRange: [minDate.getFullYear(), maxDate.getFullYear()],
+          container: this.parentElement,
+          onSelect: this.onSelect.bind(this)
+        });
+      } catch (e) {
+        return null;
+      }
+    },
+
+    /**
+     * Загрузка vMasker
+     * @param field {Node}
+     */
+      _loadVMasker(field) {
+      try {
+        return new VMasker(field).maskPattern(this._maskPattern);
+      } catch (e) {
+        return null;
+      }
+    },
+
+    ready() {
+      let field = this._field = this.$$('#' + this.id);
+
+      this._setPlaceholder(field);
+
+      this._pikaday = this._loadPikaday(field);
+      this._vMasker = this._loadVMasker(field);
     }
 
-    try {
-      window.VMasker(field).maskPattern(this._maskPattern);
-    } catch (e) {
-      console.error(e);
-    }
+  });
 
-  }
-
-});
+}(window));
