@@ -44,6 +44,13 @@
     },
 
     /**
+     * Закрыть датапикер
+     */
+    hideDatePicker() {
+      this._pikaday.hide();
+    },
+
+    /**
      * Заполнение плейсхолдера
      * @param field {Node}
      */
