@@ -16,4 +16,3 @@ Example:
 ```html
 <paper-pikaday label="String" from="String" to="String"></paper-pikaday>
 ```
-
