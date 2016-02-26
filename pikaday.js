@@ -2,14 +2,14 @@
  * Pikaday
  *
  * Copyright © 2015 David Bushell | BSD & MIT license | https://github.com/dbushell/Pikaday
- * Copyright © 2015 Denis Baskovsky (Changes)
+ * Copyright © 2015-2016 Denis Baskovsky (Changes)
  */
 'use strict';
 (function (window, document, sto) {
   const MM = 'Минуты';
   const HH = 'Часы';
 
-  var addEvent = function (el, e, callback, capture) {
+  let addEvent = function (el, e, callback, capture) {
       el.addEventListener(e, callback, !!capture);
     },
 
@@ -32,52 +32,53 @@
       }
     },
 
-    trim = function (str) {
+    trim = (str) => {
       return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
     },
 
-    hasClass = function (el, cn) {
+    hasClass = (el, cn) => {
       return (' ' + el.className + ' ').indexOf(' ' + cn + ' ') !== -1;
     },
 
-    addClass = function (el, cn) {
+    addClass = (el, cn) => {
       if (!hasClass(el, cn)) {
         el.className = (el.className === '') ? cn : el.className + ' ' + cn;
       }
     },
 
-    removeClass = function (el, cn) {
+    removeClass = (el, cn) => {
       el.className = trim((' ' + el.className + ' ').replace(' ' + cn + ' ', ' '));
     },
 
-    isArray = function (obj) {
+    isArray = (obj) => {
       return (/Array/).test(Object.prototype.toString.call(obj));
     },
 
-    isDate = function (obj) {
+    isDate = (obj) => {
       return (/Date/).test(Object.prototype.toString.call(obj)) && !isNaN(obj.getTime());
     },
 
-    isWeekend = function (date) {
-      var day = date.getDay();
+    isWeekend = (date) => {
+      let day = date.getDay();
+
       return day === 0 || day === 6;
     },
 
-    isLeapYear = function (year) {
+    isLeapYear = (year) => {
       // solution by Matti Virkkunen: http://stackoverflow.com/a/4881951
       return year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
     },
 
-    getDaysInMonth = function (year, month) {
+    getDaysInMonth = (year, month) => {
       return [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
     },
 
-    compareDates = function (a, b) {
+    compareDates = (a, b) => {
       return a.getTime() === b.getTime();
     },
 
     extend = function (to, from, overwrite) {
-      var prop, hasProp;
+      let prop, hasProp;
       for (prop in from) {
         hasProp = to[prop] !== undefined;
         if (hasProp && typeof from[prop] === 'object' && from[prop] !== null && from[prop].nodeName === undefined) {
@@ -203,7 +204,7 @@
     /**
      * templating functions to abstract HTML rendering
      */
-    renderDayName = (opts, day, abbr) => {
+    renderDayName = function (opts, day, abbr) {
       day += opts.firstDay;
       while (day >= 7) {
         day -= 7;
@@ -214,12 +215,12 @@
 
     renderDay = function (opts) {
       if (opts.isEmpty) {
-        return '<td class="is-empty"></td>';
+        return `<td class="is-empty"></td>`;
       }
 
       let button = '<button type="button" class="pika-button pika-day" ';
 
-      var arr = [];
+      let arr = [];
       if (opts.isDisabled) {
         arr.push('is-disabled');
         button += ' disabled ';
@@ -284,15 +285,16 @@
 
     renderHours = (instance, hh) => {
       let body = '';
-
-      body += '<span class="drop-menu"><p>Часы</p>';
-      body += `<paper-dropdown-menu label="${HH}" no-animations no-label-float>`;
-      body += '<paper-menu class="dropdown-content">';
+      body += `
+        <span class="drop-menu"><p>Часы</p>
+        <paper-dropdown-menu label="${HH}" no-animations no-label-float>
+        <paper-menu class="dropdown-content">
+      `;
 
       // шаг в 2 часа
       for (let i = 0; i < 24; i += 2) {
         let text = i < 10 ?
-          '0' + i :
+          `0${i}` :
           i;
 
         body += `<paper-item>${text}</paper-item>`;
@@ -301,7 +303,7 @@
       body += '</paper-menu></paper-dropdown-menu></span>';
 
       sto(() => {
-        setHH.bind(instance)(hh);
+        instance.setHH(hh);
       }, 0);
 
       return body;
@@ -309,9 +311,11 @@
 
     renderMinutes = (instance, mm) => {
       let body = '';
-      body += '<span class="drop-menu"><p>Минуты</p>';
-      body += `<paper-dropdown-menu label="${MM}" no-animations no-label-float>`;
-      body += '<paper-menu class="dropdown-content">';
+      body += `
+        <span class="drop-menu"><p>Минуты</p>
+        <paper-dropdown-menu label="${MM}" no-animations no-label-float>
+        <paper-menu class="dropdown-content">
+      `;
 
       // шаг в 5 минут
       for (let i = 0; i < 60; i += 5) {
@@ -323,7 +327,7 @@
       body += '</paper-menu></paper-dropdown-menu></span>';
 
       sto(() => {
-        setMM.bind(instance)(mm);
+        instance.setMM(mm);
       }, 0);
 
       return body;
@@ -416,32 +420,9 @@
       return '<table cellpadding="0" cellspacing="0" class="pika-table">' + renderHead(opts) + renderBody(data) + '</table>';
     },
 
-    setMM = function (mm) {
-      getMMInput.bind(this.el)().value = mm;
-    },
-
-    getMM = function () {
-      return Number.parseInt(getMMInput.bind(this)().value || 0.0);
-    },
-
-    setHH = function (hh) {
-      getHHInput.bind(this.el)().value = hh;
-    },
-
-    getHH = function () {
-      return Number.parseInt(getHHInput.bind(this)().value || 0.0);
-    },
-
-    getMMInput = function () {
-      return this.querySelector(`[label="${MM}"] paper-input`);
-    },
-
-    getHHInput = function () {
-      return this.querySelector(`[label="${HH}"] paper-input`);
-    },
-
     hideDropdowns = function (instance) {
       var $pdm;
+
       // TODO: неправильно кидается this
       try {
         $pdm = instance.querySelectorAll('paper-dropdown-menu');
@@ -459,59 +440,21 @@
 
     },
 
-    getFormatDate = function (instance, target, self) {
-      let hh, mm, yyyy, MM, dd;
-
-      if (instance.tagName === 'PAPER-MATERIAL') {
-        hh = getHH.bind(instance)();
-        mm = getMM.bind(instance)();
-
-        if (self && self.calendars) {
-          let cDate = self.calendars[0];
-          yyyy = cDate.year;
-          MM = cDate.month;
-          dd = cDate.day;
-        }
-
-      } else if (instance.el) {
-        hh = getHH.bind(instance.el)();
-        mm = getMM.bind(instance.el)();
-
-        yyyy = instance.calendars && instance.calendars[0].year;
-        MM = instance.calendars && instance.calendars[0].month;
-
-        dd = 1;
-
-        try {
-          dd = self.getDate && self.getDate().getDate();
-        } catch (e) {
-          console.warn('date is not select, default by 1');
-        }
-      }
-
-      if (target) {
-        dd = target.getAttribute('data-pika-day');
-        MM = target.getAttribute('data-pika-month');
-        yyyy = target.getAttribute('data-pika-year');
-      }
-
-      return new Date(yyyy, MM, dd, hh, mm);
-    },
-
     /**
      * Pikaday constructor
      */
     Pikaday = function (options) {
-      var self = this,
-        opts = self.config(options);
+      let self = this;
+      let opts = self.config(options);
 
       self._onMouseDown = function (e) {
         if (!self._v) {
           return;
         }
+
         e = e || window.event;
 
-        var target = e.target || e.srcElement;
+        let target = e.target || e.srcElement;
         if (!target) {
           return;
         }
@@ -523,7 +466,7 @@
           // Если кликаем на выпадающий список - обновляем значения
           // и пропускаем обработчик закрытия окна
           case 'PAPER-ITEM':
-            let date = getFormatDate(this, null, self);
+            let date = self.getFormatDate(this, null, self);
             let labelName = target.closest('[label]').getAttribute('label');
             let newVal = String(target.textContent);
 
@@ -545,14 +488,14 @@
         }
 
         if (target.getAttribute('data-pika-year')) {
-          self._d = getFormatDate(this, target);
+          self._d = self.getFormatDate(this, target);
         }
 
         if (!hasClass(target.parentNode, 'is-disabled')) {
 
           var paperBtn = target.closest('.pika-button');
           if (paperBtn && !paperBtn.classList.contains('is-empty')) {
-            var formatDate = getFormatDate(this, paperBtn);
+            let formatDate = self.getFormatDate(this, paperBtn);
             self.setDate(formatDate);
             return;
           } else if (hasClass(target, 'pika-prev')) {
@@ -655,27 +598,35 @@
         }
       };
 
-      self.el = document.createElement('paper-material');
+      // TODO: TEST
+      let paperMaterial = document.createElement('paper-material');
+
+      self.el = self._o.container.appendChild(paperMaterial);
       self.el.elevation = 2;
       self.el.style.backgroundColor = 'white';
       self.el.style.position = 'absolute';
       self.el.className = 'pika-single' + (opts.isRTL ? ' is-rtl' : '');
 
-      addEvent(self.el, 'ontouchend' in document ? 'touchend' : 'mousedown', self._onMouseDown, true);
+
+      addEvent(self.el,
+        'ontouchend' in document ?
+          'touchend' :
+          'mousedown', self._onMouseDown, true);
       addEvent(self.el, 'change', self._onChange);
 
       addEvent(opts.field, 'keyup', function (e) {
-        // нажатие таб - скрывает страницу
-        if (e.keyCode === 9) {
-          self.hideElem(document.querySelector('.pika-single'));
-          return;
-        }
+        switch (e.keyCode) {
+          // нажатие таб - скрывает страницу
+          case 9:
+            self.hideElem(document.querySelector('.pika-single'));
+            break;
 
-        // обработчик Enter на форме input
-        // Сохранение date
-        if (e.keyCode === 13) {
-          let date = Pikaday.convertStringToDate(e.target.value);
-          self.setDate(date);
+          // обработчик Enter на форме input
+          // Сохранение date
+          case 13:
+            let date = Pikaday.convertStringToDate(e.target.value);
+            self.setDate(date);
+            break;
         }
 
       });
@@ -728,10 +679,49 @@
    */
   Pikaday.prototype = {
 
+    getFormatDate (instance, target, self) {
+      let hh, mm, yyyy, MM, dd;
+
+      if (instance.tagName === 'PAPER-MATERIAL') {
+
+        hh = this.getHH();
+        mm = this.getMM();
+
+        if (self && self.calendars) {
+          let cDate = self.calendars[0];
+          yyyy = cDate.year;
+          MM = cDate.month;
+          dd = cDate.day;
+        }
+
+      } else if (instance.el) {
+        hh = this.getHH();
+        mm = this.getMM();
+        yyyy = instance.calendars && instance.calendars[0].year;
+        MM = instance.calendars && instance.calendars[0].month;
+
+        dd = 1;
+
+        try {
+          dd = self.getDate && self.getDate().getDate();
+        } catch (e) {
+          console.warn('date is not select, default by 1');
+        }
+      }
+
+      if (target) {
+        dd = target.getAttribute('data-pika-day');
+        MM = target.getAttribute('data-pika-month');
+        yyyy = target.getAttribute('data-pika-year');
+      }
+
+      return new Date(yyyy, MM, dd, hh, mm);
+    },
+
     /**
      * configure functionality
      */
-    config: function (options) {
+      config (options) {
       if (!this._o) {
         this._o = extend({}, defaults, true);
       }
@@ -792,21 +782,21 @@
     /**
      * return a formatted string of the current selection (using Moment.js if available)
      */
-    toString: function () {
+      toString () {
       return Pikaday.toFormatDate(this._d);
     },
 
     /**
      * return a Date object of the current selection
      */
-    getDate: function () {
+      getDate () {
       return isDate(this._d) ? new Date(this._d.getTime()) : null;
     },
 
     /**
      * set the current selection
      */
-    setDate: function (date, preventOnSelect) {
+      setDate (date, preventOnSelect) {
       if (!date) {
         this._d = null;
 
@@ -845,7 +835,10 @@
 
     },
 
-    setFieldFormat: function () {
+    /**
+     *
+     */
+      setFieldFormat () {
 
       if (this.getDate() === null) {
         return false;
@@ -862,10 +855,35 @@
       }
     },
 
+    get getMMInput() {
+      return this.el.querySelector(`[label="${MM}"] paper-input`);
+    },
+
+    get getHHInput() {
+      return this.el.querySelector(`[label="${HH}"] paper-input`);
+    },
+
+    setMM (mm) {
+      this.getMMInput.value = mm;
+    },
+
+    getMM () {
+      return Number.parseInt(this.getMMInput.value || 0.0);
+    },
+
+    setHH (hh) {
+      this.getHHInput.value = hh;
+    },
+
+    getHH () {
+      return Number.parseInt(this.getHHInput.value || 0.0);
+    },
+
+
     /**
      * change view to a specific date
      */
-    gotoDate: function (date) {
+      gotoDate (date) {
       var newCalendar = true;
 
       if (!isDate(date)) {
@@ -899,7 +917,10 @@
       this.adjustCalendars();
     },
 
-    adjustCalendars: function () {
+    /**
+     *
+     */
+      adjustCalendars () {
       this.calendars[0] = adjustCalendar(this.calendars[0]);
       for (let c = 1; c < this._o.numberOfMonths; c++) {
         this.calendars[c] = adjustCalendar({
@@ -910,26 +931,35 @@
       this.draw();
     },
 
-    gotoToday: function () {
+    /**
+     *
+     */
+      gotoToday () {
       this.gotoDate(new Date());
     },
 
     /**
      * change view to a specific month (zero-index, e.g. 0: January)
      */
-    gotoMonth: function (month) {
+      gotoMonth (month) {
       if (!isNaN(month)) {
         this.calendars[0].month = parseInt(month, 10);
         this.adjustCalendars();
       }
     },
 
-    nextMonth: function () {
+    /**
+     *
+     */
+      nextMonth () {
       this.calendars[0].month++;
       this.adjustCalendars();
     },
 
-    prevMonth: function () {
+    /**
+     *
+     */
+      prevMonth () {
       this.calendars[0].month--;
       this.adjustCalendars();
     },
@@ -937,7 +967,7 @@
     /**
      * change view to a specific full year (e.g. "2012")
      */
-    gotoYear: function (year) {
+      gotoYear (year) {
       if (!isNaN(year)) {
         this.calendars[0].year = parseInt(year, 10);
         this.adjustCalendars();
@@ -947,7 +977,7 @@
     /**
      * change the minDate
      */
-    setMinDate: function (value) {
+      setMinDate (value) {
       this._o.minDate = value;
       this._o.minYear = value.getFullYear();
       this._o.minMonth = value.getMonth();
@@ -956,15 +986,21 @@
     /**
      * change the maxDate
      */
-    setMaxDate: function (value) {
+      setMaxDate (value) {
       this._o.maxDate = value;
     },
 
-    setStartRange: function (value) {
+    /**
+     *
+     */
+      setStartRange (value) {
       this._o.startRange = value;
     },
 
-    setEndRange: function (value) {
+    /**
+     *
+     */
+      setEndRange (value) {
       this._o.endRange = value;
     },
 
@@ -972,14 +1008,18 @@
      * Кнопка ставящее текущее время
      * @returns {Element}
      */
-    nowButton: function () {
-      var self = this;
+      nowButton () {
+      let self = this;
+
       let btn = document.createElement('paper-icon-button');
       btn.icon = 'restore';
       btn.title = 'Установить текущее время';
       btn.className = 'nowBtn';
 
-      btn.onclick = function () {
+      btn.style.float = 'right';
+      btn.style.lineHeight = '3';
+
+      btn.onclick = () => {
         let now = new Date();
         self.setDate(now);
       };
@@ -990,17 +1030,17 @@
     /**
      * refresh the HTML
      */
-    draw: function (force) {
+      draw (force) {
       if (!this._v && !force) {
         return;
       }
 
-      var opts = this._o,
-        minYear = opts.minYear,
-        maxYear = opts.maxYear,
-        minMonth = opts.minMonth,
-        maxMonth = opts.maxMonth,
-        html = '';
+      let opts = this._o;
+      let minYear = opts.minYear;
+      let maxYear = opts.maxYear;
+      let minMonth = opts.minMonth;
+      let maxMonth = opts.maxMonth;
+      let html = '';
 
       var self = this;
 
@@ -1028,19 +1068,31 @@
           '</div>';
       }
 
-      this.el.innerHTML = html;
-      this.el.querySelector('.footer').appendChild(this.nowButton());
+
+      if (this.el.children.length > 0) {
+        this.removeEl();
+      }
+
+      let node = document.createElement('div');
+      node.innerHTML = html;
+
+      this.el.appendChild(node);
+
+      this._o.container.appendChild(this.el);
+
+      let footer = this.el.querySelector('.footer');
+      footer.appendChild(this.nowButton());
 
       if (opts.bound) {
         if (opts.field.type !== 'hidden') {
-          sto(function () {
+          sto(() => {
             opts.trigger.focus();
           }, 1);
         }
       }
 
       if (typeof this._o.onDraw === 'function') {
-        sto(function () {
+        sto(() => {
           self._o.onDraw.call(self);
         }, 0);
       }
@@ -1050,7 +1102,7 @@
     /**
      * Установка позиции по левому краю инпута
      */
-    adjustPosition: function () {
+      adjustPosition () {
       let field = this._o.trigger;
       let clientRect = field.getBoundingClientRect();
 
@@ -1061,7 +1113,10 @@
       this.el.style.top = `${top}px`;
     },
 
-    isToday: function (a, b) {
+    /**
+     *
+     */
+      isToday (a, b) {
       a.setHours(0);
       a.setMinutes(0);
       a.setSeconds(0);
@@ -1075,9 +1130,9 @@
     },
 
     /**
-     * render HTML for a particular month
+     * Render HTML for a particular month
      */
-    render: function (year, month, hh, mm) {
+      render (year, month, hh, mm) {
       var opts = this._o,
         now = new Date(),
         days = getDaysInMonth(year, month),
@@ -1140,7 +1195,10 @@
       return renderTable(opts, data);
     },
 
-    show: function () {
+    /**
+     *
+     */
+      show () {
       this.el.hidden = false;
       if (!this._v) {
         removeClass(this.el, 'is-hidden');
@@ -1156,7 +1214,10 @@
       }
     },
 
-    hide: function () {
+    /**
+     *
+     */
+      hide () {
       if (this._v !== false) {
         if (this._o.bound) {
           removeEvent(document, 'click', this._onClick);
@@ -1169,14 +1230,17 @@
       }
     },
 
-    hideElem: function (elem) {
+    /**
+     * Скрытие элемента
+     */
+      hideElem (elem) {
       elem.hidden = true;
     },
 
     /**
      * DESTROY CALENDAR
      */
-    destroy: function () {
+      destroy () {
       this.hide();
       removeEvent(this.el, 'mousedown', this._onMouseDown, true);
       removeEvent(this.el, 'change', this._onChange);
@@ -1188,7 +1252,17 @@
           removeEvent(this._o.trigger, 'blur', this._onInputBlur);
         }
       }
+
+      this.removeEl();
+    },
+
+    removeEl() {
       if (this.el.parentNode) {
+
+        for (let i = 0; i < this.el.children.length; i++) {
+          this.el.children[i].parentNode.removeChild(this.el.children[i]);
+        }
+
         this.el.parentNode.removeChild(this.el);
       }
     }
@@ -1205,7 +1279,7 @@
    * @param date
    * @returns {*}
    */
-  Pikaday.toFormatDate = function (date) {
+  Pikaday.toFormatDate = (date) => {
     if (!(date instanceof Date)) {
       throw 'date is not a Date';
     }
@@ -1237,7 +1311,6 @@
       mm;
 
     return `${dd}.${month}.${yyyy} ${hh}:${mm}`;
-
   };
 
   /**
@@ -1245,7 +1318,7 @@
    * @param str
    * @returns {Date}
    */
-  Pikaday.convertStringToDate = function (str) {
+  Pikaday.convertStringToDate = (str) => {
     let dd = str.slice(0, 2) - 0;
     let month = str.slice(3, 5) - 1;
     let yyyy = str.slice(6, 10) - 0;
@@ -1255,8 +1328,6 @@
     return new Date(yyyy, month, dd, hh, mm);
   };
 
-  window.Pikaday = Pikaday;
-
-  return Pikaday;
+  return (window.Pikaday = Pikaday);
 
 }(window, window.document, window.setTimeout));

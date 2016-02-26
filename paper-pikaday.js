@@ -23,6 +23,9 @@
       date: Date
     },
 
+    /**
+     * @returns {Node|null}
+     */
     get field() {
       return this._field;
     },
@@ -46,7 +49,7 @@
     /**
      * Закрыть датапикер
      */
-    hideDatePicker() {
+      hideDatePicker() {
       this._pikaday.hide();
     },
 
@@ -72,7 +75,10 @@
       maskField.placeholder = placeholder;
     },
 
-    _getDefaultDates() {
+    /**
+     * Получить даты по-умолчанию
+     */
+      _getDefaultDates() {
       let minDate = new Date(0);
       if (this.from) {
         minDate = new Date(this.from);
@@ -83,15 +89,13 @@
         maxDate = new Date(this.until);
       }
 
-      return {
-        minDate,
-        maxDate
-      };
+      return {minDate, maxDate};
     },
 
     /**
      * Загрузка Pikaday
      * @param field {Node}
+     * @returns {Object|null}
      */
       _loadPikaday(field) {
       let defaultDates = this._getDefaultDates();
@@ -118,6 +122,7 @@
     /**
      * Загрузка vMasker
      * @param field {Node}
+     * @returns {Object|null}
      */
       _loadVMasker(field) {
       try {
@@ -128,7 +133,7 @@
     },
 
     ready() {
-      let field = this._field = this.$$('#' + this.id);
+      let field = this._field = this.$$(`#${this.id}`);
 
       this._setPlaceholder(field);
 
