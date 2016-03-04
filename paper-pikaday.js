@@ -36,19 +36,18 @@
      */
       onSelect(date) {
 
-      console.log('123')
-
       this.date = date;
       this._field.value = Pikaday.toFormatDate(date);
+
+      // FIXME: обновление
+      this._pikaday.setDate(date, true);
+
     },
 
     /**
      * Открыть датапикер
      */
       showDatePicker() {
-
-      console.log('123123123')
-
       this._pikaday.show();
     },
 
@@ -77,6 +76,7 @@
           placeholder += patternValue;
         }
       }
+
       field.placeholder = this._placeholder;
       maskField.placeholder = placeholder;
     },
@@ -105,9 +105,6 @@
      * @returns {Object|null}
      */
       _loadPikaday(field) {
-
-      console.log('dsddddddddddddd')
-
       let defaultDates = this._getDefaultDates();
       let minDate = defaultDates.minDate;
       let maxDate = defaultDates.maxDate;

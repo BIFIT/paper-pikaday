@@ -224,16 +224,23 @@
     top: 0;
   }
 
-  .pika-single.loading::before {
+  .pika-single::before {
     position: absolute;
     display: block;
     content: '';
-    background: white;
+    background: transparent;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
     z-index: 99999;
+    pointer-events: none;
+    transition: all 0.1s;
+    margin: auto;
+  }
+
+  .pika-single.loading::before {
+    background: white;
   }
 
   .pika-single .pika-lendar paper-material.dropdown-content.style-scope.paper-menu-button.x-scope.paper-material-0 {

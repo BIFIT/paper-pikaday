@@ -636,6 +636,7 @@
       self.el.elevation = 2;
       self.el.style.backgroundColor = 'white';
       self.el.style.position = 'absolute';
+      //self.el.style.overflow = 'hidden';
       self.el.className = 'pika-single' + (opts.isRTL ? ' is-rtl' : '');
 
       addEvent(self.el,
@@ -832,8 +833,10 @@
 
     /**
      * set the current selection
+     * @param date {Date}
+     * @param noUpdate {Boolean|null} не обновлять время
      */
-      setDate (date, preventOnSelect) {
+      setDate (date, noUpdate) {
       if (!date) {
         this._d = null;
 
@@ -864,11 +867,12 @@
 
       this._d = new Date(date.getTime());
 
+      if (noUpdate) {
+        return;
+      }
+
       this.gotoDate(this._d);
       this.setFieldFormat();
-
-      if (preventOnSelect) {
-      }
 
     },
 
@@ -878,7 +882,7 @@
       setFieldFormat () {
 
       if (this.getDate() === null) {
-        return false;
+        return;
       }
 
       // Move to refresh method
@@ -892,19 +896,33 @@
       }
     },
 
+    /**
+     *
+     * @return {Element|*|Node}
+     */
     get getMMInput() {
       return this.el.querySelector(`[label="${MM}"] paper-input`);
     },
 
+    /**
+     *
+     * @return {Element|*|Node}
+     */
     get getHHInput() {
       return this.el.querySelector(`[label="${HH}"] paper-input`);
     },
 
-    setMM (mm) {
+    /**
+     *
+     */
+      setMM (mm) {
       this.getMMInput.value = mm;
     },
 
-    getMM () {
+    /**
+     * @return {number}
+     */
+      getMM () {
       return Number.parseInt(this.getMMInput.value || 0.0);
     },
 
@@ -912,12 +930,16 @@
       this.getHHInput.value = hh;
     },
 
-    getHH () {
+    /**
+     * @return {number}
+     */
+      getHH () {
       return Number.parseInt(this.getHHInput.value || 0.0);
     },
 
     /**
      * change view to a specific date
+     * @param date {Date}
      */
       gotoDate (date) {
       let newCalendar = true;
@@ -936,7 +958,6 @@
         newCalendar = (visibleDate < firstVisibleDate.getTime() || lastVisibleDate.getTime() < visibleDate);
       }
 
-      //if (newCalendar) {
       // Init calendars
       this.calendars = [{
         day: date.getDate(),
@@ -948,7 +969,6 @@
       if (this._o.mainCalendar === 'right') {
         this.calendars[0].month += 1 - this._o.numberOfMonths;
       }
-      //}
 
       this.adjustCalendars();
     },
@@ -1004,6 +1024,7 @@
 
     /**
      * change view to a specific full year (e.g. "2012")
+     * @year {String}
      */
       gotoYear (year) {
       if (!isNaN(year)) {
@@ -1014,6 +1035,7 @@
 
     /**
      * change the minDate
+     * @param value {Object}
      */
       setMinDate (value) {
       this._o.minDate = value;
@@ -1057,7 +1079,7 @@
       btn.style.lineHeight = '3';
 
       btn.onclick = () => {
-        let now = new Date();
+        const now = new Date();
         this.setDate(now);
 
         this.hide();
