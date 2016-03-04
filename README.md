@@ -16,3 +16,6 @@ Example:
 ```html
 <paper-pikaday label="String" from="String" to="String"></paper-pikaday>
 ```
+
+Copyright © 2014 David Bushell | BSD & MIT license | http://dbushell.com/
+Copyright © 2015 BIFIT (Denis Baskovsky) | BSD & MIT license

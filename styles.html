@@ -1,17 +1,8 @@
 <style>
-  /*
- * Pikaday
- * Copyright © 2014 David Bushell | BSD & MIT license | http://dbushell.com/
- * Change styles 2015 Denis Baskovsky
- */
   .pika-single {
     z-index: 1;
     display: block;
     position: absolute;
-    /*
-      clear child float (pika-lendar), using the famous micro clearfix hack
-      http://nicolasgallagher.com/micro-clearfix-hack/
-      */
   }
 
   .pika-lendar .drop-menu .underline {
@@ -41,8 +32,6 @@
     width: 360px;
     background-color: #fff;
     box-sizing: content-box;
-    border: 1px solid #A8ACA5;
-    padding: 1rem;
   }
 
   .pika-single .pika-lendar .pika-title {
@@ -108,7 +97,6 @@
     padding: 0;
     width: 20px;
     height: 30px;
-    /* hide text using text-indent trick, using width value (it's enough) */
     text-indent: 20px;
     white-space: nowrap;
     overflow: hidden;
@@ -233,6 +221,19 @@
   .pika-single .pika-lendar paper-ripple.style-scope.paper-dropdown-menu {
     display: block;
     height: 1.5rem;
+    top: 0;
+  }
+
+  .pika-single.loading::before {
+    position: absolute;
+    display: block;
+    content: '';
+    background: white;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 99999;
   }
 
   .pika-single .pika-lendar paper-material.dropdown-content.style-scope.paper-menu-button.x-scope.paper-material-0 {

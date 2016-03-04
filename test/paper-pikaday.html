@@ -17,6 +17,54 @@
     <paper-pikaday label="from" id="dateFrom"></paper-pikaday>
   </template>
 </test-fixture>
-<script type="application/javascript" src="test.js"></script>
+<script>
+
+  suite('<paper-pikaday>', function () {
+    var pikaday;
+    var document = window.document;
+
+    setup(function () {
+      pikaday = fixture('ElementPikaday');
+    });
+
+    /**
+     * Открытие датапикера
+     */
+    test('openDatePicker', function (done) {
+      pikaday.addEventListener('click', function () {
+        var containerPikaLendar = document.querySelectorAll('.pika-lendar');
+
+        expect(containerPikaLendar).to.exist;
+
+        MockInteractions.tap(document.body);
+        done();
+      });
+
+      MockInteractions.tap(pikaday.getElementsByTagName('input')[0]);
+
+    });
+
+    /**
+     * Существование поля ввода
+     */
+    test('pikaday.field', function (done) {
+      expect(pikaday.field).to.exist;
+
+      done();
+    });
+    /**
+     * Проверка на соответствие текущего времени
+     */
+    test('pikaday.date', function (done) {
+      var date = pikaday.properties.date();
+      expect(date).to.eql(Date());
+
+      done();
+    });
+
+  });
+
+
+</script>
 </body>
 </html>

@@ -4,10 +4,35 @@
  * Copyright © 2015 David Bushell | BSD & MIT license | https://github.com/dbushell/Pikaday
  * Copyright © 2015-2016 Denis Baskovsky (Changes)
  */
-'use strict';
 (function (window, document, sto) {
+  'use strict';
+
   const MM = 'Минуты';
   const HH = 'Часы';
+
+  /**
+   * "03.02.2016 12:44"
+   *  to
+   * "02.03.2016 12:44"
+   *
+   * @param value
+   * @return {String|Null}
+   */
+  function convertEngToRusDateValue(value) {
+
+    try {
+      let a = value.match(/^(\d+)/)[1];
+      let b = value.match(/^\d+.(\d+)/)[1];
+      let c = value.match(/^\d+.\d+.(\d+.+)/)[1];
+
+      return `${b}.${a}.${c}`;
+    } catch (e) {
+      console.log(e);
+    }
+
+    return null;
+
+  }
 
   let addEvent = function (el, e, callback, capture) {
       el.addEventListener(e, callback, !!capture);
@@ -77,7 +102,7 @@
       return a.getTime() === b.getTime();
     },
 
-    extend = function (to, from, overwrite) {
+    extend = (to, from, overwrite) => {
       let prop, hasProp;
       for (prop in from) {
         hasProp = to[prop] !== undefined;
@@ -103,7 +128,7 @@
       return to;
     },
 
-    adjustCalendar = function (calendar) {
+    adjustCalendar = (calendar) => {
       if (calendar.month < 0) {
         calendar.year -= Math.ceil(Math.abs(calendar.month) / 12);
         calendar.month += 12;
@@ -204,7 +229,7 @@
     /**
      * templating functions to abstract HTML rendering
      */
-    renderDayName = function (opts, day, abbr) {
+    renderDayName = (opts, day, abbr) => {
       day += opts.firstDay;
       while (day >= 7) {
         day -= 7;
@@ -213,7 +238,7 @@
       return abbr ? opts.i18n.weekdaysShort[day] : opts.i18n.weekdays[day];
     },
 
-    renderDay = function (opts) {
+    renderDay = (opts) => {
       if (opts.isEmpty) {
         return `<td class="is-empty"></td>`;
       }
@@ -413,17 +438,16 @@
         html += nextBtn;
       }
 
-      return html += '</div>';
+      return (html += '</div>');
     },
 
     renderTable = (opts, data) => {
       return '<table cellpadding="0" cellspacing="0" class="pika-table">' + renderHead(opts) + renderBody(data) + '</table>';
     },
 
-    hideDropdowns = function (instance) {
-      var $pdm;
+    hideDropdowns = (instance) => {
+      let $pdm;
 
-      // TODO: неправильно кидается this
       try {
         $pdm = instance.querySelectorAll('paper-dropdown-menu');
       } catch (e) {
@@ -459,6 +483,10 @@
           return;
         }
 
+        if (target.getAttribute('data-pika-year')) {
+          self._d = self.getFormatDate(this, target);
+        }
+
         switch (target.tagName) {
           case 'PAPER-MATERIAL':
             return;
@@ -466,6 +494,9 @@
           // Если кликаем на выпадающий список - обновляем значения
           // и пропускаем обработчик закрытия окна
           case 'PAPER-ITEM':
+          {
+
+
             let date = self.getFormatDate(this, null, self);
             let labelName = target.closest('[label]').getAttribute('label');
             let newVal = String(target.textContent);
@@ -478,22 +509,19 @@
               self.calendars[0].minute = newVal;
             }
 
-            self._d = date;
+            self.setDate(date);
             self.setFieldFormat();
 
             return;
+          }
 
           default:
             break;
         }
 
-        if (target.getAttribute('data-pika-year')) {
-          self._d = self.getFormatDate(this, target);
-        }
-
         if (!hasClass(target.parentNode, 'is-disabled')) {
+          const paperBtn = target.closest('.pika-button');
 
-          var paperBtn = target.closest('.pika-button');
           if (paperBtn && !paperBtn.classList.contains('is-empty')) {
             let formatDate = self.getFormatDate(this, paperBtn);
             self.setDate(formatDate);
@@ -535,19 +563,22 @@
         }
       };
 
+      /**
+       * При нажатии на Enter берем значения из текстового поля и вставляем в календарь
+       * @param e
+       * @private
+       */
       self._onInputChange = (e) => {
-        if (e.firedBy === self) {
+        if (e.which !== 13) {
           return;
         }
 
-        let date = new Date(Date.parse(opts.field.value));
+        let newDate = moment(new Date(Date.parse(convertEngToRusDateValue(opts.field.value))));
 
-        if (isDate(date)) {
-          self.setDate(date);
+        if (isDate(newDate)) {
+          self.setDate(newDate);
         }
-        if (!self._v) {
-          self.show();
-        }
+
       };
 
       self._onInputFocus = () => {
@@ -573,8 +604,8 @@
 
       self._onClick = function (e) {
         e = e || window.event;
-        var target = e.target || e.srcElement,
-          pEl = target;
+        let target = e.target || e.srcElement;
+        let pEl = target;
 
         if (!target) {
           return;
@@ -598,7 +629,7 @@
         }
       };
 
-      // TODO: TEST
+
       let paperMaterial = document.createElement('paper-material');
 
       self.el = self._o.container.appendChild(paperMaterial);
@@ -607,26 +638,31 @@
       self.el.style.position = 'absolute';
       self.el.className = 'pika-single' + (opts.isRTL ? ' is-rtl' : '');
 
-
       addEvent(self.el,
         'ontouchend' in document ?
           'touchend' :
-          'mousedown', self._onMouseDown, true);
+          'mousedown', self._onMouseDown,
+        true);
+
       addEvent(self.el, 'change', self._onChange);
 
-      addEvent(opts.field, 'keyup', function (e) {
+      addEvent(opts.field, 'keyup', (e) => {
         switch (e.keyCode) {
           // нажатие таб - скрывает страницу
           case 9:
+          {
             self.hideElem(document.querySelector('.pika-single'));
             break;
+          }
 
           // обработчик Enter на форме input
           // Сохранение date
           case 13:
+          {
             let date = Pikaday.convertStringToDate(e.target.value);
             self.setDate(date);
             break;
+          }
         }
 
       });
@@ -641,7 +677,7 @@
           opts.field.parentNode.insertBefore(self.el, opts.field.nextSibling);
         }
 
-        addEvent(opts.field, 'change', self._onInputChange);
+        addEvent(opts.field, 'keyup', self._onInputChange);
 
         if (!opts.defaultDate) {
           opts.defaultDate = new Date(Date.parse(opts.field.value));
@@ -722,6 +758,7 @@
      * configure functionality
      */
       config (options) {
+
       if (!this._o) {
         this._o = extend({}, defaults, true);
       }
@@ -816,8 +853,8 @@
         return;
       }
 
-      var min = this._o.minDate,
-        max = this._o.maxDate;
+      let min = this._o.minDate;
+      let max = this._o.maxDate;
 
       if (isDate(min) && date < min) {
         date = min;
@@ -879,21 +916,20 @@
       return Number.parseInt(this.getHHInput.value || 0.0);
     },
 
-
     /**
      * change view to a specific date
      */
       gotoDate (date) {
-      var newCalendar = true;
+      let newCalendar = true;
 
       if (!isDate(date)) {
         return;
       }
 
       if (this.calendars) {
-        var firstVisibleDate = new Date(this.calendars[0].year, this.calendars[0].month, 1),
-          lastVisibleDate = new Date(this.calendars[this.calendars.length - 1].year, this.calendars[this.calendars.length - 1].month, 1),
-          visibleDate = date.getTime();
+        let firstVisibleDate = new Date(this.calendars[0].year, this.calendars[0].month, 1);
+        let lastVisibleDate = new Date(this.calendars[this.calendars.length - 1].year, this.calendars[this.calendars.length - 1].month, 1);
+        let visibleDate = date.getTime();
         // get the end of the month
         lastVisibleDate.setMonth(lastVisibleDate.getMonth() + 1);
         lastVisibleDate.setDate(lastVisibleDate.getDate() - 1);
@@ -922,12 +958,14 @@
      */
       adjustCalendars () {
       this.calendars[0] = adjustCalendar(this.calendars[0]);
+
       for (let c = 1; c < this._o.numberOfMonths; c++) {
         this.calendars[c] = adjustCalendar({
           month: this.calendars[0].month + c,
           year: this.calendars[0].year
         });
       }
+
       this.draw();
     },
 
@@ -1009,9 +1047,8 @@
      * @returns {Element}
      */
       nowButton () {
-      let self = this;
 
-      let btn = document.createElement('paper-icon-button');
+      const btn = document.createElement('paper-icon-button');
       btn.icon = 'restore';
       btn.title = 'Установить текущее время';
       btn.className = 'nowBtn';
@@ -1021,7 +1058,9 @@
 
       btn.onclick = () => {
         let now = new Date();
-        self.setDate(now);
+        this.setDate(now);
+
+        this.hide();
       };
 
       return btn;
@@ -1035,6 +1074,14 @@
         return;
       }
 
+      const el = this.el;
+
+      // Show loading
+      el.classList.add('loading');
+      setTimeout(() => {
+        el.classList.remove('loading');
+      }, 0);
+
       let opts = this._o;
       let minYear = opts.minYear;
       let maxYear = opts.maxYear;
@@ -1042,14 +1089,13 @@
       let maxMonth = opts.maxMonth;
       let html = '';
 
-      var self = this;
-
       if (this._y <= minYear) {
         this._y = minYear;
         if (!isNaN(minMonth) && this._m < minMonth) {
           this._m = minMonth;
         }
       }
+
       if (this._y >= maxYear) {
         this._y = maxYear;
         if (!isNaN(maxMonth) && this._m > maxMonth) {
@@ -1068,19 +1114,18 @@
           '</div>';
       }
 
-
-      if (this.el.children.length > 0) {
+      if (el.children.length > 0) {
         this.removeEl();
       }
 
-      let node = document.createElement('div');
+      const node = document.createElement('div');
       node.innerHTML = html;
 
-      this.el.appendChild(node);
+      el.appendChild(node);
 
-      this._o.container.appendChild(this.el);
+      this._o.container.appendChild(el);
 
-      let footer = this.el.querySelector('.footer');
+      const footer = el.querySelector('.footer');
       footer.appendChild(this.nowButton());
 
       if (opts.bound) {
@@ -1093,7 +1138,7 @@
 
       if (typeof this._o.onDraw === 'function') {
         sto(() => {
-          self._o.onDraw.call(self);
+          this._o.onDraw.call(this);
         }, 0);
       }
 
@@ -1109,12 +1154,15 @@
       let left = clientRect.left - clientRect.width / 2 - field.offsetWidth;
       let top = clientRect.bottom - clientRect.height - field.offsetHeight;
 
-      this.el.style.left = `${left}px`;
-      this.el.style.top = `${top}px`;
+      this.el.style.left = `${ left }px`;
+      this.el.style.top = `${ top }px`;
     },
 
     /**
-     *
+     * День сегодняшний
+     * @param a {Date}
+     * @param b {Date}
+     * @return {Boolean}
      */
       isToday (a, b) {
       a.setHours(0);
@@ -1133,12 +1181,13 @@
      * Render HTML for a particular month
      */
       render (year, month, hh, mm) {
-      var opts = this._o,
-        now = new Date(),
-        days = getDaysInMonth(year, month),
-        before = new Date(year, month, 1).getDay(),
-        data = [],
-        row = [];
+      const opts = this._o;
+      const now = new Date();
+      const days = getDaysInMonth(year, month);
+
+      let before = new Date(year, month, 1).getDay();
+      let data = [];
+      let row = [];
 
       if (opts.firstDay > 0) {
         before -= opts.firstDay;
@@ -1147,38 +1196,40 @@
         }
       }
 
-      let cells = days + before,
-        after = cells;
+      let cells = days + before;
+      let after = cells;
 
       while (after > 7) {
         after -= 7;
       }
 
       cells += 7 - after;
+
       for (let i = 0, r = 0; i < cells; i++) {
-        let day = new Date(year, month, 1 + (i - before), hh, mm),
-          isSelected = isDate(this._d) ? compareDates(day, this._d) : false,
-          isToday = this.isToday(day, now),
-          isEmpty = i < before || i >= (days + before),
-          isStartRange = opts.startRange && compareDates(opts.startRange, day),
-          isEndRange = opts.endRange && compareDates(opts.endRange, day),
-          isInRange = opts.startRange && opts.endRange && opts.startRange < day && day < opts.endRange,
-          isDisabled = (opts.minDate && day < opts.minDate) ||
-            (opts.maxDate && day > opts.maxDate) ||
-            (opts.disableWeekends && isWeekend(day)) ||
-            (opts.disableDayFn && opts.disableDayFn(day)),
-          dayConfig = {
-            day: 1 + (i - before),
-            month: month,
-            year: year,
-            isSelected: isSelected,
-            isToday: isToday,
-            isDisabled: isDisabled,
-            isEmpty: isEmpty,
-            isStartRange: isStartRange,
-            isEndRange: isEndRange,
-            isInRange: isInRange
-          };
+        let day = new Date(year, month, 1 + (i - before), hh, mm);
+        let isSelected = isDate(this._d) ? compareDates(day, this._d) : false;
+        let isToday = this.isToday(day, now);
+        let isEmpty = i < before || i >= (days + before);
+        let isStartRange = opts.startRange && compareDates(opts.startRange, day);
+        let isEndRange = opts.endRange && compareDates(opts.endRange, day);
+        let isInRange = opts.startRange && opts.endRange && opts.startRange < day && day < opts.endRange;
+        let isDisabled = (opts.minDate && day < opts.minDate) ||
+          (opts.maxDate && day > opts.maxDate) ||
+          (opts.disableWeekends && isWeekend(day)) ||
+          (opts.disableDayFn && opts.disableDayFn(day));
+
+        const dayConfig = {
+          day: 1 + (i - before),
+          month: month,
+          year: year,
+          isSelected: isSelected,
+          isToday: isToday,
+          isDisabled: isDisabled,
+          isEmpty: isEmpty,
+          isStartRange: isStartRange,
+          isEndRange: isEndRange,
+          isInRange: isInRange
+        };
 
         row.push(renderDay(dayConfig));
 
@@ -1217,17 +1268,20 @@
     /**
      *
      */
-      hide () {
+      hide() {
       if (this._v !== false) {
         if (this._o.bound) {
           removeEvent(document, 'click', this._onClick);
         }
+
         addClass(this.el, 'is-hidden');
         this._v = false;
+
         if (typeof this._o.onClose === 'function') {
           this._o.onClose.call(this);
         }
       }
+
     },
 
     /**
@@ -1242,10 +1296,12 @@
      */
       destroy () {
       this.hide();
+
       removeEvent(this.el, 'mousedown', this._onMouseDown, true);
-      removeEvent(this.el, 'change', this._onChange);
+      removeEvent(this.el, 'change', this._onChange, true);
+
       if (this._o.field) {
-        removeEvent(this._o.field, 'change', this._onInputChange);
+        removeEvent(this._o.field, 'keyup', this._onInputChange);
         if (this._o.bound) {
           removeEvent(this._o.trigger, 'click', this._onInputClick);
           removeEvent(this._o.trigger, 'focus', this._onInputFocus);
@@ -1256,14 +1312,23 @@
       this.removeEl();
     },
 
-    removeEl() {
-      if (this.el.parentNode) {
+    /**
+     * Удалить всех потомков
+     */
+      removeEl() {
 
-        for (let i = 0; i < this.el.children.length; i++) {
-          this.el.children[i].parentNode.removeChild(this.el.children[i]);
-        }
+      if (this.el.parentNode) {
+        [].forEach.call(this.el.children, child => {
+          child.parentNode.removeChild(child);
+        });
 
         this.el.parentNode.removeChild(this.el);
+      }
+
+      // HACK: против загрузки ещё одного div
+      if (this.el.children.length === 1) {
+        let child = this.el.children[0];
+        child.parentNode.removeChild(child);
       }
     }
 
@@ -1276,7 +1341,7 @@
 
   /**
    * Конвертация в ДД.ММ.ГГГГ ЧЧ:ММ
-   * @param date
+   * @param date {Date}
    * @returns {*}
    */
   Pikaday.toFormatDate = (date) => {
@@ -1315,7 +1380,7 @@
 
   /**
    * Конвертация строк в дату
-   * @param str
+   * @param str {String}
    * @returns {Date}
    */
   Pikaday.convertStringToDate = (str) => {

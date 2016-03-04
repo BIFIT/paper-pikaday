@@ -35,6 +35,9 @@
      * @param {Date} date
      */
       onSelect(date) {
+
+      console.log('123')
+
       this.date = date;
       this._field.value = Pikaday.toFormatDate(date);
     },
@@ -43,6 +46,9 @@
      * Открыть датапикер
      */
       showDatePicker() {
+
+      console.log('123123123')
+
       this._pikaday.show();
     },
 
@@ -77,6 +83,7 @@
 
     /**
      * Получить даты по-умолчанию
+     * @returns {Object}
      */
       _getDefaultDates() {
       let minDate = new Date(0);
@@ -98,6 +105,9 @@
      * @returns {Object|null}
      */
       _loadPikaday(field) {
+
+      console.log('dsddddddddddddd')
+
       let defaultDates = this._getDefaultDates();
       let minDate = defaultDates.minDate;
       let maxDate = defaultDates.maxDate;
@@ -115,6 +125,7 @@
           onSelect: this.onSelect.bind(this)
         });
       } catch (e) {
+        console.error(e);
         return null;
       }
     },
@@ -128,11 +139,15 @@
       try {
         return new VMasker(field).maskPattern(this._maskPattern);
       } catch (e) {
+        console.error(e);
         return null;
       }
     },
 
-    ready() {
+    /**
+     *
+     */
+      ready() {
       let field = this._field = this.$$(`#${this.id}`);
 
       this._setPlaceholder(field);
