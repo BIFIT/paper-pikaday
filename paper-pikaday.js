@@ -32,16 +32,22 @@
 
     /**
      * Клик на число
-     * @param {Date} date
+     * @param date {Date}
      */
       onSelect(date) {
-
       this.date = date;
       this._field.value = Pikaday.toFormatDate(date);
 
-      // FIXME: обновление
       this._pikaday.setDate(date, true);
+    },
 
+    /**
+     * Установка времени date {Date}
+     */
+      setDate(date) {
+      this.date = date;
+      this._field.value = Pikaday.toFormatDate(date);
+      this._pikaday.setDate(date);
     },
 
     /**
@@ -105,9 +111,9 @@
      * @returns {Object|null}
      */
       _loadPikaday(field) {
-      let defaultDates = this._getDefaultDates();
-      let minDate = defaultDates.minDate;
-      let maxDate = defaultDates.maxDate;
+      const defaultDates = this._getDefaultDates();
+      const minDate = defaultDates.minDate;
+      const maxDate = defaultDates.maxDate;
 
       try {
         return new Pikaday({
@@ -145,7 +151,7 @@
      *
      */
       ready() {
-      let field = this._field = this.$$(`#${this.id}`);
+      let field = this._field = this.$$(`#${ this.id }`);
 
       this._setPlaceholder(field);
 
